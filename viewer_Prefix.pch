@@ -1,0 +1,32 @@
+//
+// Prefix header for all source files of the 'viewer' target in the 'viewer' project
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+	#import <Quartz/Quartz.h>
+#endif
+
+#import "DDLog.h"
+#import "DDTTYLogger.h"
+#import "DDASLLogger.h"
+
+// Log levels: off, error, warn, info, verbose
+
+// Log levels: off, error, warn, info, verbose
+#ifdef DEBUG
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+#else
+static const int ddLogLevel = LOG_LEVEL_ERROR;
+#endif
+
+
+#ifdef DEBUG
+#define DEBUGWHERE_SHOWFULLINFO
+#define DEBUG_SHOWLINES
+#define DEBUG_SHOWFULLPATH
+#define DEBUG_SHOWSEPARATORS
+#define DEBUG_SHOWFULLINFO
+#endif
+
+#import "debug.h"
