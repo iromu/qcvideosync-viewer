@@ -42,7 +42,6 @@
 		B58D8CB811F9016300568199 /* R2D2.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = R2D2.icns; sourceTree = "<group>"; };
 		B5A2666A121D784E00EC07F8 /* SocketController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocketController.h; sourceTree = "<group>"; };
 		B5A2666B121D784E00EC07F8 /* SocketController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocketController.m; sourceTree = "<group>"; };
-		B5A26699121D7B6A00EC07F8 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		D97A9E3B152F65C900FC9E0E /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		D97A9E49152F6D6B00FC9E0E /* GCDAsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GCDAsyncSocket.h; path = ../../../../../Shared/Source/CocoaAsyncSocket/GCD/GCDAsyncSocket.h; sourceTree = "<group>"; };
 		D97A9E4A152F6D6B00FC9E0E /* GCDAsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GCDAsyncSocket.m; path = ../../../../../Shared/Source/CocoaAsyncSocket/GCD/GCDAsyncSocket.m; sourceTree = "<group>"; };
@@ -58,6 +57,7 @@
 		D9863B6715341DD20043C141 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDTTYLogger.m; path = ../../../../../Shared/Source/github/robbiehanson/CocoaLumberjack/LumberJack/DDTTYLogger.m; sourceTree = "<group>"; };
 		D9863B6815341DD20043C141 /* Extensions */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Extensions; path = ../../../../../Shared/Source/github/robbiehanson/CocoaLumberjack/LumberJack/Extensions; sourceTree = "<group>"; };
 		D9B6674A152F046000B983DE /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		D9EB24DC15359A1800959E62 /* SocketControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocketControllerDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +118,7 @@
 			children = (
 				D9863B7415341EA00043C141 /* Logging */,
 				D97A9E4F152F6D7A00FC9E0E /* TCP */,
+				D9EB24DE15359A3600959E62 /* Protocols */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -132,7 +133,6 @@
 			children = (
 				29B97316FDCFA39411CA2CEA /* main.m */,
 				7219AB410FAA1D5900573434 /* viewer_Prefix.pch */,
-				B5A26699121D7B6A00EC07F8 /* common.h */,
 				D9B6674A152F046000B983DE /* debug.h */,
 			);
 			name = "Other Sources";
@@ -183,6 +183,14 @@
 				D9863B6815341DD20043C141 /* Extensions */,
 			);
 			name = Logging;
+			sourceTree = "<group>";
+		};
+		D9EB24DE15359A3600959E62 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				D9EB24DC15359A1800959E62 /* SocketControllerDelegate.h */,
+			);
+			name = Protocols;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

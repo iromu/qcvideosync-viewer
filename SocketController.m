@@ -9,7 +9,6 @@
 #import "SocketController.h"
 #import "GCDAsyncSocket.h"
 
-
 @interface SocketController (Private)
 - (void)connectToNextAddress;
 @end
@@ -41,7 +40,7 @@
 {	
 	DDLogVerbose(@"Entering 'SocketController.onSocket.didReadData.withTag'.");
 	
-	[sock readDataToData:[GCDAsyncSocket CRLFData] withTimeout:NO_TIMEOUT tag:0];
+	//[sock readDataToData:[GCDAsyncSocket CRLFData] withTimeout:NO_TIMEOUT tag:0];
 	NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 	
 	if([str hasPrefix: @"CMD "]){
@@ -50,13 +49,12 @@
 			[theDelegate onCommand: command];
 		
 	}
-	else if([str hasPrefix: @"Tick "]){
+	//else if([str hasPrefix: @"Tick "]){
+    else if(tag == TICK_MSG){
         [sock writeData:data withTimeout:NO_TIMEOUT tag:TICK_MSG];
-        double CurrentTime = [[NSDate date] timeIntervalSince1970];
-        
-        double lag = (CurrentTime - [[str substringFromIndex:5] doubleValue] ) * 1000.00;
-        
-        DDLogVerbose(@"lag: %f ms", lag);	
+        //double CurrentTime = [[NSDate date] timeIntervalSince1970];
+        //double lag = (CurrentTime - [[str substringFromIndex:5] doubleValue] ) * 1000.00;
+        //DDLogVerbose(@"lag: %f ms", lag);	
     }
     else if([str hasPrefix: @"WARNING "]){
         DDLogVerbose(@"Recieved: %@", str);

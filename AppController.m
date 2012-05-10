@@ -7,25 +7,22 @@
 //
 
 #import "AppController.h"
-
-
-//@class SocketController;
+#import "SocketController.h"
 
 @interface AppController (PrivateAPI)
-//-(BOOL) connectSocket: (NSString *) host port: (UInt16) port;
-
 -(void)startFireDateTimer:(double) delay;
 - (void)sendMoviePlayCommand;
 - (void)changePlayList:(NSUInteger) number;
 - (void)playNext:(NSUInteger) number;
 - (NSArray* ) getMoviesAt: (NSString* ) inPath;
+-(void) enterFullScreen;
+-(void) enterFullScreen2;
+- (void)qtMovieEnded:(NSNotification*)notification;
 @end
 
 @implementation AppController
 
 @synthesize window;
-//@synthesize delegate;
-//@synthesize socket;
 @synthesize nextMovie;
 @synthesize library;
 @synthesize currentPlayList;
@@ -33,8 +30,32 @@
 @synthesize pl2Array;
 @synthesize pl3Array;
 
-#pragma mark App methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark AppController private methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void)startFireDateTimer:(double) delay 
+{
+	DDLogVerbose(@"Entering 'startFireDateTimer'.");
+	
+	double delta = (0.5 + delay) * -1.00;
+	NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:delta];
+	NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
+											  interval:0.1
+												target:self
+											  selector:@selector(sendMoviePlayCommand)
+											  userInfo:nil//[self userInfo]
+											   repeats:NO];
+	
+	NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
+	[runLoop addTimer:timer forMode:NSDefaultRunLoopMode];
+}
+
+- (void)sendMoviePlayCommand 
+{
+	DDLogVerbose(@"Entering 'sendMoviePlayCommand'.");
+	[[qtView movie] play];
+}
 
 - (void)qtMovieEnded:(NSNotification*)notification
 {
@@ -53,9 +74,8 @@
     
 }
 
-
-
--(void)enterFullScreen{
+-(void)enterFullScreen
+{
 	
 	if (!fullscreen) {
 		
@@ -96,19 +116,266 @@
 	}
 	
 }
+
 /*
--(void) enterFullScreen
-{
-	[[self.window contentView] 
-     enterFullScreenMode:[self.window screen] 
-     withOptions:[NSDictionary dictionaryWithObject:
-                  [NSNumber numberWithBool:YES]  
-                                             forKey:NSFullScreenModeSetting] ];
-    
+ -(void) enterFullScreen
+ {
+ [[self.window contentView] 
+ enterFullScreenMode:[self.window screen] 
+ withOptions:[NSDictionary dictionaryWithObject:
+ [NSNumber numberWithBool:YES]  
+ forKey:NSFullScreenModeSetting] ];
+ 
+ }
+ */
+
+- (void)changePlayList:(NSUInteger) number {
+	DDLogVerbose(@"Entering 'changePlayList'. Number %lu", number);
+	
+	//[currentPlayList release];
+	switch (number) {
+		case 1:
+			self.currentPlayList = [NSArray arrayWithArray: self.pl1Array];
+			break;
+		case 2:
+			self.currentPlayList = [NSArray arrayWithArray: self.pl2Array];
+			break;
+		case 3:{
+            self.currentPlayList = [NSArray arrayWithArray: self.pl3Array];
+			//NSMutableArray* shuffle = [NSMutableArray arrayWithArray: self.pl3Array];
+			/*
+             NSUInteger count = [shuffle count];
+             for (NSUInteger i = 0; i < count; ++i) {
+             int nElements = count - i;
+             int n = (arc4random() % nElements) + i;
+             [shuffle exchangeObjectAtIndex:i withObjectAtIndex:n];
+             }
+             self.currentPlayList = [NSArray arrayWithArray: shuffle];
+             */
+			break;
+		}
+		default:
+			break;
+	}
+	if (nextMovie)	{
+        
+        //[nextMovie release];
+        self.nextMovie=nil;
+    }
 }
-*/
 
+- (void)playNext:(NSUInteger) number 
+{
+	DDLogVerbose(@"Entering 'playNext'. Number %lu", number);
+	
+	//[[qtView movie] stop];
+	
+	NSString* fileName;
+	nextIndex = number;
+	NSUInteger count = [currentPlayList count];
+	
+	if (nextIndex >= count) {
+		nextIndex = nextIndex % count;
+	}
+	
+	DDLogVerbose(@"Loading index %lu/%lu", nextIndex,count);
+	
+	/*
+     QTTime duration = [[qtView movie] duration];
+     QTTime currentTime = [[qtView movie] currentTime];
+     
+     DDLogVerbose(@"Duration %llu/%lu,%lu", duration.timeValue, duration.timeScale, duration.flags);
+     DDLogVerbose(@"currentTime %llu/%lu,%lu", currentTime.timeValue, currentTime.timeScale, currentTime.flags);
+     */
+	
+	//[[qtView movie] autorelease];
+	/*
+     if(!nextMovie){
+     NSUInteger oldIndex = nextIndex-1;
+     if(nextIndex == 0)oldIndex = count-1;
+     DDLogVerbose(@"Pre-loading first movie %@", [currentPlayList objectAtIndex: oldIndex]);
+     fileName = [currentPlayList objectAtIndex: oldIndex];
+     
+     QTMovie *movie_ = [[QTMovie alloc] initWithFile:fileName error:nil];
+     
+     [self setNextMovie:movie_];
+     
+     //self.nextMovie = [[QTMovie alloc] initWithFile:[currentPlayList objectAtIndex: oldIndex] error:NULL];
+     //[nextMovie retain];
+     
+     }*/
+	/*
+	 else {
+	 [nextMovie release];
+	 }*/
+	
+	//if([QTMovie canInitWithFile: [currentPlayList objectAtIndex: nextIndex]] ){
+	DDLogVerbose(@"Loading next movie %@", [currentPlayList objectAtIndex: nextIndex]);
+	//[qtView setMovie: nil];
+	//[[qtView movie] dealloc];
+	//[qtView setMovie:NULL];
+	//[qtView setControllerVisible:NO];
+	//[qtView setMovie: [self nextMovie]];
+	
+	
+	
+	fileName = [currentPlayList objectAtIndex: nextIndex];
+	/*
+     NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+     fileName, QTMovieFileNameAttribute,
+     [NSNumber numberWithBool:YES], nil];
+     QTMovie *movie_ = [[QTMovie alloc] initWithAttributes:attributes error:NULL];
+     */
+	
+	QTMovie *movie_ = [[QTMovie alloc] initWithFile:fileName error:nil];
+	
+	[qtView setMovie: movie_];
+	movie_=nil;
+	
+	[[qtView movie] play];
+	
+	//[self setNextMovie:nil];
+	
+	//[nextMovie release];
+	
+	//self.nextMovie=nil;
+	//fileName = [currentPlayList objectAtIndex: nextIndex];
+	
+	//QTMovie *movie_ = [[QTMovie alloc] initWithFile:fileName error:nil];
+	//[self setNextMovie:movie_];
+	
+	//self.nextMovie = [[QTMovie alloc] initWithFile:[currentPlayList objectAtIndex: nextIndex] error:NULL];
+	//[nextMovie retain];
+	//[nextMovie autorelease];
+	//[newmovie release];
+	//}
+	
+}
 
+/*
+ - (void)setNextMovie:(QTMovie *)movie_
+ {
+ [movie_ retain];
+ //[movie_ autorelease];
+ [nextMovie release];
+ nextMovie=nil;
+ nextMovie = movie_;
+ 
+ }
+ */
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark NSApplication delegate methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)applicationWillTerminate:(NSNotification *)notification
+{
+	DDLogVerbose(@"Entering 'applicationWillTerminate'.");
+	[mainWindow orderOut:self];
+	
+	// Release the display(s)
+	if (CGDisplayRelease( kCGDirectMainDisplay ) != kCGErrorSuccess) {
+		DDLogVerbose( @"Couldn't release the display(s)!" );
+		// Note: if you display an error dialog here, make sure you set
+		// its window level to the same one as the shield window level,
+		// or the user won't see anything.
+	}
+	CGAssociateMouseAndMouseCursorPosition (true);
+	CGDisplayShowCursor (kCGNullDirectDisplay);
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    
+    // Configure logging framework
+	[DDLog addLogger:[DDTTYLogger sharedInstance]];
+	[DDLog addLogger:[DDASLLogger sharedInstance]];
+    
+	DDLogVerbose(@"Entering 'applicationDidFinishLaunching'.");
+	
+#ifdef RELEASE
+    [self enterFullScreen ];
+#endif
+    
+	self.library = @"/Users/Shared/Movies";
+	
+	NSString* pl1Path = [NSString stringWithFormat: @"%@/PL1", library];
+	NSString* pl2Path = [NSString stringWithFormat: @"%@/PL2", library];
+	NSString* pl3Path = [NSString stringWithFormat: @"%@/PL3", library];
+	
+	self.pl1Array = [self getMoviesAt: pl1Path];
+	self.pl2Array = [self getMoviesAt: pl2Path];
+	self.pl3Array = [self getMoviesAt: pl3Path];
+	
+	self.currentPlayList = [NSArray arrayWithArray: self.pl1Array];
+	
+	DDLogVerbose(@"pl1Array count %lu",[pl1Array count]);
+	DDLogVerbose(@"pl2Array count %lu",[pl2Array count]);
+	DDLogVerbose(@"pl3Array count %lu",[pl3Array count]);
+	
+	DDLogVerbose(@"currentPlayList count %lu",[currentPlayList count]);
+	
+	[qtView setControllerVisible:NO];
+    
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(qtMovieEnded:)
+                                                 name:QTMovieDidEndNotification object:qtView.movie];
+	
+	clientSocket = [[SocketController alloc] initWithDelegate: (id<SocketControllerDelegate>)self];
+	[clientSocket startBrowsing];
+}
+
+- (NSArray* ) getMoviesAt: (NSString* ) inPath
+{
+	NSMutableArray* movies = [NSMutableArray array];
+	//NSArray* filesAtPath = [[NSFileManager defaultManager] directoryContentsAtPath:inPath];
+	NSArray* filesAtPath = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:inPath error:nil];
+	NSEnumerator* itr = [filesAtPath objectEnumerator];
+	NSString* obj;
+	NSString* fileName;
+	while ((obj = [itr nextObject]))
+	{
+		if ( ![obj hasPrefix:@"."] ) {
+			fileName = [NSString stringWithFormat: @"%@/%@", inPath, obj];
+			DDLogVerbose(@"Loading movie %@",fileName);
+			//QTMovie* newmovie = [[QTMovie alloc] initWithFile:fileName error:NULL];
+			[movies addObject: fileName];
+			//[newmovie release];
+		}
+	}
+	
+	//return filesAtPath;
+	return [NSArray arrayWithArray: movies];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark NSWindow delegate methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (BOOL)canBecomeKeyWindow
+{
+	return YES;
+}
+
+- (void)windowWillClose:(NSNotification *)notification 
+{
+	DDLogVerbose(@"Entering 'windowWillClose'.");
+	[NSApp terminate:self];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark SocketController delegate methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 -(void)onCommand:(NSString * ) command{
 	
@@ -151,10 +418,10 @@
 			DDLogVerbose(@"Entering 'onCommand.CT'.");
 			
 			/*
-			long long		timeValue;
-			long			timeScale;
-			long			flags;
-			*/
+             long long		timeValue;
+             long			timeScale;
+             long			flags;
+             */
 			
 			QTTime duration = [[qtView movie] duration];
 			QTTime currentTime = [[qtView movie] currentTime];
@@ -197,7 +464,7 @@
 	else if ([command hasPrefix:@"STOP"]) {
 		DDLogVerbose(@"Entering 'onCommand.STOP'.");
 		[[qtView movie] stop];
-	//	[[qtView movie] gotoBeginning];
+        //	[[qtView movie] gotoBeginning];
 		//[qtView setMovie: nil];
 		/*if(nextMovie){
 		 [nextMovie release];
@@ -208,282 +475,9 @@
 	//[pool release];
 	
 }
-- (void)sendMoviePlayCommand {
-	DDLogVerbose(@"Entering 'sendMoviePlayCommand'.");
-	[[qtView movie] play];
-}
 
-- (void)changePlayList:(NSUInteger) number {
-	DDLogVerbose(@"Entering 'changePlayList'. Number %lu", number);
-	
-	//[currentPlayList release];
-	switch (number) {
-		case 1:
-			self.currentPlayList = [NSArray arrayWithArray: self.pl1Array];
-			break;
-		case 2:
-			self.currentPlayList = [NSArray arrayWithArray: self.pl2Array];
-			break;
-		case 3:{
-            self.currentPlayList = [NSArray arrayWithArray: self.pl3Array];
-			//NSMutableArray* shuffle = [NSMutableArray arrayWithArray: self.pl3Array];
-			/*
-            NSUInteger count = [shuffle count];
-			for (NSUInteger i = 0; i < count; ++i) {
-				int nElements = count - i;
-				int n = (arc4random() % nElements) + i;
-				[shuffle exchangeObjectAtIndex:i withObjectAtIndex:n];
-			}
-			self.currentPlayList = [NSArray arrayWithArray: shuffle];
-             */
-			break;
-		}
-		default:
-			break;
-	}
-	if (nextMovie)	{
-	 
-	 //[nextMovie release];
-	 self.nextMovie=nil;
-	 }
-}
-
-- (void)playNext:(NSUInteger) number {
-	DDLogVerbose(@"Entering 'playNext'. Number %lu", number);
-	
-	//[[qtView movie] stop];
-	
-	NSString* fileName;
-	nextIndex = number;
-	NSUInteger count = [currentPlayList count];
-	
-	if (nextIndex >= count) {
-		nextIndex = nextIndex % count;
-	}
-	
-	DDLogVerbose(@"Loading index %lu/%lu", nextIndex,count);
-	
-	/*
-	QTTime duration = [[qtView movie] duration];
-	QTTime currentTime = [[qtView movie] currentTime];
-	
-	DDLogVerbose(@"Duration %llu/%lu,%lu", duration.timeValue, duration.timeScale, duration.flags);
-	DDLogVerbose(@"currentTime %llu/%lu,%lu", currentTime.timeValue, currentTime.timeScale, currentTime.flags);
-	*/
-	
-	//[[qtView movie] autorelease];
-	/*
-	if(!nextMovie){
-		NSUInteger oldIndex = nextIndex-1;
-		if(nextIndex == 0)oldIndex = count-1;
-		DDLogVerbose(@"Pre-loading first movie %@", [currentPlayList objectAtIndex: oldIndex]);
-		fileName = [currentPlayList objectAtIndex: oldIndex];
-		
-		QTMovie *movie_ = [[QTMovie alloc] initWithFile:fileName error:nil];
-		
-		[self setNextMovie:movie_];
-		
-		//self.nextMovie = [[QTMovie alloc] initWithFile:[currentPlayList objectAtIndex: oldIndex] error:NULL];
-		//[nextMovie retain];
-		
-	}*/
-	/*
-	 else {
-	 [nextMovie release];
-	 }*/
-	
-	//if([QTMovie canInitWithFile: [currentPlayList objectAtIndex: nextIndex]] ){
-	DDLogVerbose(@"Loading next movie %@", [currentPlayList objectAtIndex: nextIndex]);
-	//[qtView setMovie: nil];
-	//[[qtView movie] dealloc];
-	//[qtView setMovie:NULL];
-	//[qtView setControllerVisible:NO];
-	//[qtView setMovie: [self nextMovie]];
-	
-	
-	
-	fileName = [currentPlayList objectAtIndex: nextIndex];
-	/*
-	NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
-								fileName, QTMovieFileNameAttribute,
-								[NSNumber numberWithBool:YES], nil];
-	QTMovie *movie_ = [[QTMovie alloc] initWithAttributes:attributes error:NULL];
-	*/
-	
-	QTMovie *movie_ = [[QTMovie alloc] initWithFile:fileName error:nil];
-	
-	[qtView setMovie: movie_];
-	movie_=nil;
-	
-	[[qtView movie] play];
-	
-	//[self setNextMovie:nil];
-	
-	//[nextMovie release];
-	
-	//self.nextMovie=nil;
-	//fileName = [currentPlayList objectAtIndex: nextIndex];
-	
-	//QTMovie *movie_ = [[QTMovie alloc] initWithFile:fileName error:nil];
-	//[self setNextMovie:movie_];
-	
-	//self.nextMovie = [[QTMovie alloc] initWithFile:[currentPlayList objectAtIndex: nextIndex] error:NULL];
-	//[nextMovie retain];
-	//[nextMovie autorelease];
-	//[newmovie release];
-	//}
-	
-}
-/*
-- (void)setNextMovie:(QTMovie *)movie_
-{
-    [movie_ retain];
-	//[movie_ autorelease];
-    [nextMovie release];
-	nextMovie=nil;
-    nextMovie = movie_;
-	
-}
-*/
-- (void)startFireDateTimer:(double) delay {
-	DDLogVerbose(@"Entering 'startFireDateTimer'.");
-	
-	double delta = (0.5 + delay) * -1.00;
-	NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:delta];
-	NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
-											  interval:0.1
-												target:self
-											  selector:@selector(sendMoviePlayCommand)
-											  userInfo:nil//[self userInfo]
-											   repeats:NO];
-	
-	NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
-	[runLoop addTimer:timer forMode:NSDefaultRunLoopMode];
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-#pragma mark NSNibLoading delegate methods
-- (void) awakeFromNib
-{
-	DDLogVerbose(@"Entering 'awakeFromNib'.");
-}
-
-#pragma mark -
-
-#pragma mark NSApplication delegate methods
-
-- (void)applicationWillTerminate:(NSNotification *)notification
-{
-	DDLogVerbose(@"Entering 'applicationWillTerminate'.");
-	[mainWindow orderOut:self];
-	
-	// Release the display(s)
-	if (CGDisplayRelease( kCGDirectMainDisplay ) != kCGErrorSuccess) {
-		DDLogVerbose( @"Couldn't release the display(s)!" );
-		// Note: if you display an error dialog here, make sure you set
-		// its window level to the same one as the shield window level,
-		// or the user won't see anything.
-	}
-	CGAssociateMouseAndMouseCursorPosition (true);
-	CGDisplayShowCursor (kCGNullDirectDisplay);
-}
-
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-    
-    // Configure logging framework
-	
-	[DDLog addLogger:[DDTTYLogger sharedInstance]];
-	[DDLog addLogger:[DDASLLogger sharedInstance]];
-    
-    
-	DDLogVerbose(@"Entering 'applicationDidFinishLaunching'.");
-	
-    #ifdef RELEASE
-    //[self enterFullScreen ];
-    #endif
-    
-	self.library = @"/Users/Shared/Movies";
-	
-	
-	NSString* pl1Path = [NSString stringWithFormat: @"%@/PL1", library];
-	NSString* pl2Path = [NSString stringWithFormat: @"%@/PL2", library];
-	NSString* pl3Path = [NSString stringWithFormat: @"%@/PL3", library];
-	
-	self.pl1Array = [self getMoviesAt: pl1Path];
-	self.pl2Array = [self getMoviesAt: pl2Path];
-	self.pl3Array = [self getMoviesAt: pl3Path];
-	
-	self.currentPlayList = [NSArray arrayWithArray: self.pl1Array];
-	
-	DDLogVerbose(@"pl1Array count %lu",[pl1Array count]);
-	DDLogVerbose(@"pl2Array count %lu",[pl2Array count]);
-	DDLogVerbose(@"pl3Array count %lu",[pl3Array count]);
-	
-	DDLogVerbose(@"currentPlayList count %lu",[currentPlayList count]);
-	
-	[qtView setControllerVisible:NO];
-	
-	fullscreen = YES;
-	/*
-	 movieTest = [[QTMovie alloc] initWithFile:[[NSBundle mainBundle] 
-	 pathForResource:@"leader" 
-	 ofType:@"m4v"] 
-	 error:NULL];
-	 */
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(qtMovieEnded:)
-	          name:QTMovieDidEndNotification object:qtView.movie];
-	
-	
-	// Advanced options - enable the socket to contine operations even during modal dialogs, and menu browsing
-	//[socket setRunLoopModes:[NSArray arrayWithObject:NSRunLoopCommonModes]];
-	
-    
-    
-	clientSocket = [[SocketController alloc] initWithDelegate: (id<SocketControllerDelegate>)self];
-	[clientSocket startBrowsing];
-    //[clientSocket connectSocket: @"localhost" port:8888];
-	//[clientSocket connectSocket: @"192.168.1.11" port:8888];
-	
-	
-}
-
-
-#pragma mark -
-
-- (NSArray* ) getMoviesAt: (NSString* ) inPath
-{
-	NSMutableArray* movies = [NSMutableArray array];
-	//NSArray* filesAtPath = [[NSFileManager defaultManager] directoryContentsAtPath:inPath];
-	NSArray* filesAtPath = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:inPath error:nil];
-	NSEnumerator* itr = [filesAtPath objectEnumerator];
-	NSString* obj;
-	NSString* fileName;
-	while ((obj = [itr nextObject]))
-	{
-		if ( ![obj hasPrefix:@"."] ) {
-			fileName = [NSString stringWithFormat: @"%@/%@", inPath, obj];
-			DDLogVerbose(@"Loading movie %@",fileName);
-			//QTMovie* newmovie = [[QTMovie alloc] initWithFile:fileName error:NULL];
-			[movies addObject: fileName];
-			//[newmovie release];
-		}
-	}
-	
-	//return filesAtPath;
-	return [NSArray arrayWithArray: movies];
-}
-
-#pragma mark NSWindow delegate methods
-- (BOOL)canBecomeKeyWindow
-{
-	return YES;
-}
-- (void)windowWillClose:(NSNotification *)notification 
-{
-	DDLogVerbose(@"Entering 'windowWillClose'.");
-	[NSApp terminate:self];
-}
-
-#pragma mark -
 @end
