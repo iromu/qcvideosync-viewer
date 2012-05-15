@@ -10,14 +10,15 @@
 
 int main(int argc, char *argv[])
 {
-	@autoreleasepool {
-	
-		int retVal = NSApplicationMain(argc,  (const char **) argv);
-		
-		//[pool drain];
-		
-    return retVal;
+    @autoreleasepool {
+
+        int retVal = NSApplicationMain(argc, (const char * *) argv);
+
+        //[pool drain];
+
+        return retVal;
     }
-	
+
     //return NSApplicationMain(argc,  (const char **) argv);
 }
+

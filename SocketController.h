@@ -12,20 +12,20 @@
 
 @interface SocketController : NSObject <NSNetServiceBrowserDelegate, NSNetServiceDelegate>
 {
-    GCDAsyncSocket*                 asyncSocket;
-	BOOL                            connected;
-	id<SocketControllerDelegate>    theDelegate;
-	
-	BOOL                            running;
-    NSNetServiceBrowser*            netServiceBrowser;
-    NSNetService*                   serverService;
-    NSMutableArray*                 serverAddresses;
+    GCDAsyncSocket *                 asyncSocket;
+    BOOL connected;
+    id<SocketControllerDelegate>    theDelegate;
+
+    BOOL running;
+    NSNetServiceBrowser *            netServiceBrowser;
+    NSNetService *                   serverService;
+    NSMutableArray *                 serverAddresses;
 }
 
-@property (readwrite, strong) id<SocketControllerDelegate> theDelegate;	
-@property (readwrite, assign) BOOL running;	
+@property (readwrite, strong) id<SocketControllerDelegate> theDelegate;
+@property (readwrite, assign) BOOL running;
 
--(id) initWithDelegate: (id<SocketControllerDelegate>) delegate;
--(void) startBrowsing;
+- (id) initWithDelegate:(id<SocketControllerDelegate>)delegate;
+- (void) startBrowsing;
 
 @end

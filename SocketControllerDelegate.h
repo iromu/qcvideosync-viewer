@@ -7,5 +7,5 @@
 //
 
 @protocol SocketControllerDelegate <NSObject>
--(void)onCommand:(NSString * ) cmd;
+- (void)onCommand:(NSString *)cmd;
 @end
